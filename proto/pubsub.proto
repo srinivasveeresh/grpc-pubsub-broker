@@ -1,0 +1,68 @@
+syntax = "proto3";
+option go_package = "github.com/srinivasveeresh/openvpn-manager/grpc-pubsub-broker;pubsub";
+
+package pubsub;
+
+service PubSub {
+  rpc Publish (Message) returns (Ack);
+  rpc PublishToSubscriber (TargetedMessage) returns (Ack);
+  rpc PublishToSubscribers (TargetedGroupMessage) returns (Ack);
+  rpc Subscribe (SubscribeRequest) returns (stream SubscriptionMessage);
+  rpc Forward (Message) returns (Ack);
+  rpc ListSubscribers (SubscribeRequest) returns (SubscriberList);
+  rpc ListTopics (Empty) returns (TopicList);
+  rpc Unsubscribe (UnsubscribeRequest) returns (Ack);
+}
+
+message Empty {}
+
+message Message {
+  string topic = 1;
+  string data = 2;
+}
+
+message TargetedMessage {
+  string topic = 1;
+  string subscriber_id = 2;
+  string data = 3;
+}
+
+message TargetedGroupMessage {
+  string topic = 1;
+  repeated string subscriber_ids = 2;
+  string data = 3;
+}
+
+message SubscribeRequest {
+  string topic = 1;
+}
+
+message UnsubscribeRequest {
+  string topic = 1;
+  string subscriber_id = 2;
+}
+
+message SubscriptionMessage {
+  string subscriber_id = 1;
+  string topic = 2;
+  string data = 3;
+}
+
+message SubscriberMetadata {
+  string subscriber_id = 1;
+  string ip_address = 2;
+  repeated string tags = 3;
+}
+
+message SubscriberList {
+  repeated SubscriberMetadata subscribers = 1;
+}
+
+message TopicList {
+  repeated string topics = 1;
+}
+
+message Ack {
+  string status = 1;
+}
+

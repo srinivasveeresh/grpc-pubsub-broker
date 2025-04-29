@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  server1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app/server
+    command: go run server.go
+    environment:
+      - ADDRESS=:50051
+      - PEERS=server2:50052,server3:50053
+      - TLS=false
+    ports:
+      - "50051:50051"
+
+  server2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app/server
+    command: go run server.go
+    environment:
+      - ADDRESS=:50052
+      - PEERS=server1:50051,server3:50053
+      - TLS=false
+    ports:
+      - "50052:50052"
+
+  server3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app/server
+    command: go run server.go
+    environment:
+      - ADDRESS=:50053
+      - PEERS=server1:50051,server2:50052
+      - TLS=false
+    ports:
+      - "50053:50053"
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app/client
+    command: go run client.go
+    environment:
+      - SERVERS=server1:50051,server2:50052,server3:50053
+      - TLS=false
+    depends_on:
+      - server1
+      - server2
+      - server3
+
